@@ -19,7 +19,7 @@ namespace osu.Framework.IO.Serialization
         {
             if (reader.ValueType == typeof(double))
             {
-                double value = -1;//reader.ReadAsDouble().GetValueOrDefault();
+                double value = reader.ReadAsDouble().GetValueOrDefault();
                 return new Vector2d(value, value);
             }
 
