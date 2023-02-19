@@ -234,6 +234,7 @@ namespace osu.Framework.Platform
             if (existingSource == null)
                 return;
 
+            // TODO : Seems to have absolute input
             float x = evtTfinger.x * Size.Width;
             float y = evtTfinger.y * Size.Height;
 
@@ -241,8 +242,12 @@ namespace osu.Framework.Platform
 
             switch (eventType)
             {
-                case SDL.SDL_EventType.SDL_FINGERDOWN:
                 case SDL.SDL_EventType.SDL_FINGERMOTION:
+                    if (SDL.SDL_GetRelativeMouseMode() == SDL.SDL_bool.SDL_FALSE)
+                        TouchMove?.Invoke(new Vector2(x, y));
+                    break;
+
+                case SDL.SDL_EventType.SDL_FINGERDOWN:
                     TouchDown?.Invoke(touch);
                     break;
 
@@ -413,6 +418,8 @@ namespace osu.Framework.Platform
 
         private void handleMouseMotionEvent(SDL.SDL_MouseMotionEvent evtMotion)
         {
+            if (evtMotion.which == SDL.SDL_TOUCH_MOUSEID) return;
+
             if (SDL.SDL_GetRelativeMouseMode() == SDL.SDL_bool.SDL_FALSE)
                 MouseMove?.Invoke(new Vector2(evtMotion.x * Scale, evtMotion.y * Scale));
             else
@@ -594,6 +601,16 @@ namespace osu.Framework.Platform
         /// Invoked when the user releases a button on a joystick.
         /// </summary>
         public event Action<JoystickButton>? JoystickButtonUp;
+
+        /// <summary>
+        /// Invoked when the user moves the mouse cursor within the window.
+        /// </summary>
+        public event Action<Vector2>? TouchMove;
+
+        /// <summary>
+        /// Invoked when the user moves the mouse cursor within the window (via relative / raw input).
+        /// </summary>
+        public event Action<Vector2>? TouchMoveRelative;
 
         /// <summary>
         /// Invoked when a finger moves or touches a touchscreen.

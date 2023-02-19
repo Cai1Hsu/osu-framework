@@ -4,6 +4,7 @@
 using osu.Framework.Input.StateChanges;
 using osu.Framework.Platform;
 using osu.Framework.Statistics;
+using osuTK;
 
 namespace osu.Framework.Input.Handlers.Touch
 {
@@ -23,17 +24,26 @@ namespace osu.Framework.Input.Handlers.Touch
             {
                 if (enabled.NewValue)
                 {
+                    window.TouchMove += HandleTouchMove;
                     window.TouchDown += handleTouchDown;
                     window.TouchUp += handleTouchUp;
                 }
                 else
                 {
+                    window.TouchMove -= HandleTouchMove;
                     window.TouchDown -= handleTouchDown;
                     window.TouchUp -= handleTouchUp;
                 }
             }, true);
 
             return true;
+        }
+
+        protected virtual void HandleTouchMove(Vector2 position)
+        {
+            // TODO
+            // absolutePositionReceived = true;
+            enqueueInput(new MousePositionAbsoluteInput { Position = position });
         }
 
         private void handleTouchDown(Input.Touch touch)
@@ -44,6 +54,12 @@ namespace osu.Framework.Input.Handlers.Touch
         private void handleTouchUp(Input.Touch touch)
         {
             enqueueTouch(touch, false);
+        }
+
+        private void enqueueInput(IInput input)
+        {
+            PendingInputs.Enqueue(input);
+            FrameStatistics.Increment(StatisticsCounterType.TouchEvents);
         }
 
         private void enqueueTouch(Input.Touch touch, bool activate)
